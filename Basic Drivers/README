@@ -1,0 +1,57 @@
+There are three drivers in this demonstration
+
+sachin.c - basic module
+deepa.c  - module with a load time parameter
+bhalu.c  - driver with a load time parameter and runtime changeable attributes.
+
+The command to build a module is:
+
+   make -C /lib/modules/$(uname -r)/build M=mymoduledir modules
+
+This command will process the Makefiles in the kernel build directory and then
+look for a file called Kbuild in your module directory to specify the list of
+modules to be built. A detailed description of Kbuild is at
+Documentation/kbuild/. In particular, read the modules.txt file on how to build
+modules out of the kernel source tree.
+
+In our directory, we use a top level Makefile0 file for convenience. It uses
+the above make command to build all the three modules and clean up after the
+build.
+
+Makefile0 - top level makefile to build each module by invoking kernel build
+
+Kbuild 	 - simple kernel build spec for the three modules
+
+sachin.c is a basic module which just loads, does nothing and exits cleanly. It
+shows the basic structure of a kernel module.
+
+deepa.c introduces load time parameter called flag with a default value. This
+value can be changed while loading the module.
+
+bhalu.c is a module that combines a simple driver and a device with two
+attributes. The name attribute is readonly and shows the name the kernel has
+allocated to the device (e.g. bhalu1). The color attribute is read-write and
+can be modified at any time.
+
+Building Sachin		$ make sachin.ko
+
+Checking module info 	$ modinfo ./sachin.ko
+
+Loading module		$ sudo insmod ./sachin.ko
+
+Listing module		$ lsmod  | grep sachin
+	or		$ grep sachin /proc/modules
+	or		$ ls -l /sys/module/sachin
+
+Viewing syslog		$ tail -f /var/sys/log
+	or		$ dmesg | tail -f
+
+Unloading module	$ sudo rmmod sachin
+	or		$ sudo modprobe -r sachin
+
+Loading module with param	$ sudo insmod ./deepa.ko flag=23
+
+Reading a device attribute	$ cat /sys/devices/bhalu1/name
+Modifying a device attribute	# echo red >/sys/devices/bhalu1/color
+	or			$ echo red | sudo tee /sys/devices/bhalu1/color
+
