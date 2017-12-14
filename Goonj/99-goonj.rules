@@ -1,0 +1,1 @@
+SUBSYSTEM=="misc", ACTION=="add", KERNEL=="goonj*", MODE="0666"
